@@ -1,5 +1,5 @@
 # 导入写好的工具类
-# from database_manager import DatabaseManager
+
 import time
 from datetime import date
 from config import DB_CONFIG, TELEGRAM_BOT_TOKEN, CHAT_ID, SCAN_INTERVAL
@@ -19,7 +19,7 @@ def main():
         try:
             # 1.刷新视图
             db.refresh_risk_views()
-            
+
             # 2.抓取未报警的危险高危数据
             alerts = db.fetch_new_alerts()
 
