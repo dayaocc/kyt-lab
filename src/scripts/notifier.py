@@ -12,7 +12,7 @@ class TelegramBot:
         payload = {"chat_id": self.chat_id, "text": text}
         requests.post(url, data=payload)        #目标地址, 请求数据
 
-    def send_telegram_photo(self, caption, image_path):
+    def send_telegram_photo(self, caption, image_path):   # caption 图片说明文字, image_path 图片文件路径
         url = self.base_url + "/sendPhoto"
         with open(image_path, 'rb') as img_file:
             files = {'photo': img_file}

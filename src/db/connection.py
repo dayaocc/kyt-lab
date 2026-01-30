@@ -66,7 +66,7 @@ while True:
         today = date.today()
         all_alerts_data = []    # 准备空列表存放所有风险数据
         # 检查是否有高危记录
-        if alerts:
+        if alerts:  # 在 Python 里，“空”即是 False，“有”即是 True
             # 增加处理报警消息
             for row in alerts:
                 current_tx = row[0]
@@ -94,7 +94,8 @@ while True:
                 print("--风险等级分布--")
                 print(level_counts)
                 # 深度汇总：每个等级有多少笔，以及涉及的总金额是多少？
-                summary_report = df.grounpby('risk_level').agg({
+                # agg() 针对不同的列，一次性计算不同的统计指标。
+                summary_report = df.groupby('risk_level').agg({
                     'transaction_hash': 'count',    #计算笔数
                     'value_usd': 'sum'      #计算总金额
                 }).rename(columns={'transaction_hash': '交易笔数', 'value_usd': '涉及金额(USD)'})
