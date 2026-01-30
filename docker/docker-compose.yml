@@ -1,0 +1,13 @@
+
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: kytlab-postgres
+    env_file:
+      - .env
+    ports:
+      - "5432:5432"   # 映射到宿主机端口
+    volumes:
+      - ./pgdata:/var/lib/postgresql/data   # 数据持久化到当前 WSL 目录
+    restart: unless-stopped
