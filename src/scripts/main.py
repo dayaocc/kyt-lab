@@ -7,7 +7,7 @@ from datebase import DatabaseManager
 from notifier import TelegramBot
 from reporter import RiskReporter
 import pandas as pd
-
+# 主程序入口函数
 def main():
     # 实例化所有工具
     db = DatabaseManager(DB_CONFIG)
@@ -55,8 +55,10 @@ def main():
         # 7.休息一下，等待下次扫描
         time.sleep(600)  # 暂停10分钟后继续下一轮巡检
     
-    if __name__ == "__main__":
-        main()
-            
+# __main__代表“这是主程序/直接运行的文件”.整个if结构是区分“执行环境”和“导入环境”的防火墙，是入口判断。
+# 运行这个文件时，程序从这里开始执行，方便文件测试.
+# 如果这个文件被导入到其他文件中运行，下面的代码不会被执行。
+if __name__ == "__main__":  
+    main()      # 调用主函数
                 
 
