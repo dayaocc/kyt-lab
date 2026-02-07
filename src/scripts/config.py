@@ -18,3 +18,5 @@ CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")    #接收方Telegram 的 聊天 ID，�
 
 # 运行配置
 SCAN_INTERVAL = 600  # 扫描间隔，单位：600秒 (10分钟)
+
+ALCHEMY_RPC_URL = "https://eth-mainnet.g.alchemy.com/v2/rhOfO_G-zcxyYYX_HYPF0"

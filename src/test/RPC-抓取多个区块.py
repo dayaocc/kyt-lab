@@ -1,12 +1,12 @@
 from web3 import Web3
 
-rpc_url = "https://eth-mainnet.g.alchemy.com/v2/rhOfO_G-zcxyYYX_HYPF0"
-w3 = Web3(Web3.HTTPProvider(rpc_url))
+rpc_url = "https://eth-mainnet.g.alchemy.com/v2/rhOfO_G-zcxyYYX_HYPF0"  
+w3 = Web3(Web3.HTTPProvider(rpc_url))   # 创建区块链会话对象，里层：（ 通过这个URL，和链交互）
 
 if w3.is_connected():
     print("已经连上以太坊主网")
 # 1. 获取当前最新区块号
-latest_height = w3.eth.get_block_number()
+latest_height = w3.eth.block_number()
 print(f"最新区块高度是: {latest_height}")
 # 2. 计算起点（抓取最近的 10 个块）
 start_height = latest_height - 9
