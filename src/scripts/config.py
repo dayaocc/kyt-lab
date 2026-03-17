@@ -1,4 +1,5 @@
 from dotenv import load_dotenv
+import os
 
 load_dotenv()  # 从.env 文件加载环境变量
 
@@ -10,6 +11,7 @@ DB_CONFIG = {
     "user": os.getenv("DB_USER"),
     "port": os.getenv("DB_PORT")
 }
+
 
 # Telegram 机器人配置
 # 全大写，表示是全局常量
