@@ -19,9 +19,9 @@ class DatabaseManager:
 
     def create_tables(self):
         # 加载建表语句
-        create_query = self._load_sql("create_tables.sql")
+        create_sql = self._load_sql("create_tables.sql")
         try:
-            self.cur.execute(create_query)  # 执行建表语句
+            self.cur.execute(create_sql)  # 执行建表语句
             # 这里的 commit 必须立刻执行，确保表结构被物理写入硬盘
             self.conn.commit()  
             print("数据表结构初始化成功，档案库已扩容")
@@ -36,6 +36,7 @@ class DatabaseManager:
         params = (
             tx_data.get('tx_hash'),
             tx_data.get('from'),
+            tx_data.get('to'),
             tx_data.get('amount', 0),    # 对应 value 列，查找amount键。如果没有对应的key，金额默认存 0
             tx_data.get('input_data'),
             tx_data.get('block_number', 0),
@@ -46,9 +47,11 @@ class DatabaseManager:
         )
         try:
             self.cur.execute(insert_sql, params)    # 让外面（比如 main.py）循环完 100 次后再统一 commit，速度会快几十倍。
+            return True   # 成功时，返回 True
         except Exception as e:
             print(f"插入数据时发生错误(Hash: {tx_data.get('tx_hash')}): {e}")
             self.conn.rollback()    # 如果某一条出错，立刻回滚当前事务，保护数据库安全
+            return False  # 失败时，返回 False
 
         
 
