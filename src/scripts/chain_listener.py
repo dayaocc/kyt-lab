@@ -2,7 +2,7 @@ from database import DatabaseManager
 from web3 import Web3
 from config import ALCHEMY_RPC_URL, DB_CONFIG
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 # 定义一个最小化的 ERC20 ABI，只包含我们关心的 transfer 和 decimals(默认，小数位函数)
 # 把 JSON 字符串 → Python 对象.type(ERC20_ABI) == list,里面每一项是一个 dict，描述一个函数.
@@ -53,8 +53,7 @@ class ChainListener:
         # 1.从链上抓取交易原始数据
         try:
             tx = self.w3.eth.get_transaction(tx_hash)   # 从交易id  tx_hash中查交易,返回tx是一个web3.datastructures.AttributeDict，本质行为 =  dict
-            
-                      
+                                  
        
         except Exception as e:
             return {"error":f"找不到交易或网络错误：{e}"}
@@ -74,14 +73,14 @@ class ChainListener:
                 block_info = self.w3.eth.get_block(block_number)
                 # 提取 Unix 时间戳，并翻译成人类可读的格式
                 unix_timestamp = block_info.get('timestamp')
-                real_time = datetime.fromtimestamp(unix_timestamp)
+                real_time = datetime.fromtimestamp(unix_timestamp, tz=timezone.utc)  # 采用UTC时间
             except Exception as e:
                 print(f"获取区块信息失败: {e}")
         
         # 3.提取tx中的 input 数据 (有些版本叫 input，有些叫 data),即合约中的calldata               
         
         raw_input = tx.get('input', '0x')   # 如果input没有数据，就返回0x作为默认值
-        # w3.to_hex() 将数据统一格式化为带 0x 前缀的 Hex 字符串
+        # w3.to_hex() 将数据统一格式化为带 0x 前缀的 Hex string字符串（注意：是 HexBytes字节转化为字符串，便于同类型数据判断比较）
         input_data = self.w3.to_hex(raw_input)        
         
         # 4.逻辑分流：区分 ETH 和 ERC20
@@ -109,9 +108,10 @@ class ChainListener:
                 # 创建一个临时的合约对象来帮我们要解析，通过交互已有合约的方式
                 # tx['to'] 就是被命令的代币合约的地址（比如 USDT 的地址）
                 contract = self.w3.eth.contract(address=tx['to'], abi=ERC20_ABI)
-                # 解析交易中输入的函数、参数
+                # 解析交易中输入的函数、参数，要求input_data是hex string格式，且必须以0x开头
                 func_obj, func_params = contract.decode_function_input(input_data)
                 # 获取接收方和金额, 这里的 to 是参数里的接收方，不是合约地址
+                # _to、_value在开头ABI中已定义
                 receiver = func_params['_to']
                 raw_amount = func_params['_value']
                 # 与合约交互，获取代币换算精度和符号. .call()用来只读链上状态

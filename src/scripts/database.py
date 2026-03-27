@@ -37,7 +37,7 @@ class DatabaseManager:
             tx_data.get('tx_hash'),
             tx_data.get('from'),
             tx_data.get('to'),
-            tx_data.get('amount', 0),    # 对应 value 列，查找amount键。如果没有对应的key，金额默认存 0
+            tx_data.get('amount', 0),    # 查找tx_data中的amount键，对应transaction中的 value 列。如果没有对应的key，金额默认存 0
             tx_data.get('input_data'),
             tx_data.get('block_number', 0),
             tx_data.get('timestamp'),

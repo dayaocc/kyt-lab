@@ -11,7 +11,7 @@ INSERT INTO transactions (   --往 transactions 表 插入数据,并指定插入
     symbol
 )
 VALUES (
-    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s      --VALUES的顺序必须和上面指定的列的顺序一致
 )
 ON CONFLICT (tx_hash)
 DO NOTHING;   -- 遇到重复数据时，采用“什么都不做”
