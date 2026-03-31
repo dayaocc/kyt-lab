@@ -73,7 +73,16 @@ class DatabaseManager:
         update_sql_query = self._load_sql("mark_as_reported.sql")
         self.cur.execute(update_sql_query, (tx_hash,)) # 单元素元组    
 
-
+    def get_transactions(self, address):
+        get_tx_query = self._load_sql("get_transactions.sql")
+        
+        try:
+            self.cur.execute(get_tx_query, (address, address))  # 查询时，from 和 to 都要检查，所以传入两次地址参数
+            records = self.cur.fetchall()  # 获取查询结果
+            return records  # 返回查询结果列表
+        except Exception as e:
+            print(f"查询交易数据时发生错误: {e}")
+            return []  # 出错时返回空列表
 
     # 统一提交事务
     def commit(self):
