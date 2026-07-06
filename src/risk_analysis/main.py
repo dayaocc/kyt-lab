@@ -1,4 +1,6 @@
 from peel_chain_detector import PeelchainDetector
+from sanction_screener import SanctionScreener
+from risk_engine import RiskEngine
 
 def main():
     print("KYT 智能风控系统 正在启动...")
@@ -32,22 +34,49 @@ def main():
 
     print(f"成功抓取{len(mock_trace_tree)}笔链上交易数据，正在分析中...")
 
-    # 2.分析交易数据，识别剥皮链和自动化打散
-    detector = PeelchainDetector()
-    print("开始审查资金链路，识别剥皮链和自动化打散行为...")
-    reports  = detector.detect(mock_trace_tree)
+    # 建立用于收集所有警报的总清单
+    all_risk_reports = []
 
-    #3.输出分析报告
-    print("\n 发现高危风险事件：")
-    for idx, report in enumerate(reports, 1):  #遍历，同时使用enumerate()函数获取索引和报告内容，并从1开始编号
-        print(f"[{idx}] 嫌疑人：{report['sender']}, 风险标签：{report['label']}, 评分：{report['score']}")
+    # 2.检查制裁名单，扫描所有出现的地址。
+    print("启动制裁名单 API 碰撞测试。。。")
+    screener = SanctionScreener(use_mock=True)  # 使用模拟API
+
+
+    # 提取所有出现过的独立地址 (去重)
+    all_addresses = set([tx['from'] for tx in mock_trace_tree] + [tx['to'] for tx in mock_trace_tree])  
+    
+    for addr in all_addresses:
+        scanction_report = screener.check_address(addr)  # 检查每个地址是否在制裁名单中
+        if scanction_report:
+            all_risk_reports.append(scanction_report)  # 如果命中制裁名单，则加入总风险报告清单
+            print(f"[制裁名单警报] 地址 {addr} 命中制裁名单，已生成风险报告。")
+
+    
+    # 3.分析交易数据，识别剥皮链和自动化打散
+    print("启动剥皮链和自动化打散行为检测...")
+    peel_detector = PeelchainDetector()
+    print("开始审查资金链路，识别剥皮链和自动化打散行为...")
+    behavior_reports  = peel_detector.detect(mock_trace_tree)
+    all_risk_reports.extend(behavior_reports)  # 将行为分析报告加入总风险报告清单
+
+    # 4.综合评分评估，输出分析报告
+    print("[Risk Engine] 正在进行实体融合与综合定级...")
+    engine = RiskEngine()
+    final_profiles = engine.generate_comprehensive_profiles(all_risk_reports)
+    
+    for idx, report in enumerate(all_risk_reports, 1):  #遍历，同时使用enumerate()函数获取索引和报告内容，并从1开始编号
+        print(f"[{idx}] 嫌疑人：{report['sender']}, 风险标签：{report['label']}, 风险评分：{report['score']}")
+        
+        if 'details' in report:
+            print(f"  制裁名单详情：{report['details']}")
         if 'path_amounts' in report:
             print(f"  犯罪轨迹（大额流转）： {report['path_amounts']}")
         if 'amounts' in report:
             print(f"  打散金额：{report['amounts']}")
+
         print("-"*50)
 
-    print(f"审查完毕，共生成{len(reports)}份风险报告。正常用户未触发警报。")
+    print(f"审查完毕，共生成{len(all_risk_reports)}份风险报告。正常用户未触发警报。")
 
 if __name__ == "__main__":
     main()

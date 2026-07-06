@@ -3,7 +3,7 @@
 import time
 from datetime import date
 from config import DB_CONFIG, TELEGRAM_BOT_TOKEN, CHAT_ID, SCAN_INTERVAL
-from datebase import DatabaseManager
+from database import DatabaseManager
 from notifier import TelegramBot
 from reporter import RiskReporter
 import pandas as pd
