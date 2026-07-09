@@ -35,7 +35,7 @@ def main():
     print(f"成功抓取{len(mock_trace_tree)}笔链上交易数据，正在分析中...")
 
     # 建立用于收集所有警报的总清单
-    all_risk_reports = []
+    all_risk_reports = []       # list
 
     # 2.检查制裁名单，扫描所有出现的地址。
     print("启动制裁名单 API 碰撞测试。。。")
@@ -63,20 +63,24 @@ def main():
     print("[Risk Engine] 正在进行实体融合与综合定级...")
     engine = RiskEngine()
     final_profiles = engine.generate_comprehensive_profiles(all_risk_reports)
-    
-    for idx, report in enumerate(all_risk_reports, 1):  #遍历，同时使用enumerate()函数获取索引和报告内容，并从1开始编号
-        print(f"[{idx}] 嫌疑人：{report['sender']}, 风险标签：{report['label']}, 风险评分：{report['score']}")
         
-        if 'details' in report:
-            print(f"  制裁名单详情：{report['details']}")
-        if 'path_amounts' in report:
-            print(f"  犯罪轨迹（大额流转）： {report['path_amounts']}")
-        if 'amounts' in report:
-            print(f"  打散金额：{report['amounts']}")
+    for address, profile in final_profiles.items():  #遍历，同时使用enumerate()函数获取索引和报告内容，并从1开始编号
+        print(f"""
+            嫌疑主体：{profile['address']} 
+            风险标签：{profile['labels']}（共触发{profile['violation_count']}项规则）
+            最终风险评分：{profile['final_score']}/100
+            风险等级：{profile['risk_level']}
+            """)
+        
+        if profile['evidence']:
+            print("  证据详情：")
+            for evidence in profile['evidence']:
+                print(f"    - {evidence}")
+        
 
         print("-"*50)
 
-    print(f"审查完毕，共生成{len(all_risk_reports)}份风险报告。正常用户未触发警报。")
+    print(f"审查完毕，共生成{len(final_profiles)}份高危实体档案。")
 
 if __name__ == "__main__":
     main()

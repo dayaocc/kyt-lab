@@ -35,7 +35,7 @@ class RiskEngine:
         for report in raw_reports:
             grouped_reports[report['sender']].append(report)
         
-        final_profiles = {}
+        final_profiles = {}     # dict
 
         # 2. 档案融合与综合打分
         for address, reports in grouped_reports.items():
@@ -60,14 +60,14 @@ class RiskEngine:
                 if "details" in r:
                     evidence_details.append(f"制裁名单详情{r['details'].get('entity','Unknown')}")
             
-        # 3.生成最终档案
+        # 3.生成属于每一个变量address的最终档案
             final_profiles[address] = {
                 "address": address,
                 "final_score": final_score,
                 "risk_level": self._determine_level(final_score),
                 "labels": unique_labels,
                 "evidence": evidence_details,
-                "violations_count": len(reports)
+                "violation_count": len(reports)
             }
         
         return final_profiles
