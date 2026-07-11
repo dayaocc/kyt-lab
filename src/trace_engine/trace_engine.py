@@ -40,8 +40,8 @@ class TraceEngine:
         print("====================\n")
 
         # 统一转换为小写，防止大小写不一致导致的匹配问题
-        # start_address = self.config.target_address.lower()        
-        start_address = self.config.target_address
+        start_address = self.config.target_address.lower()        
+        
 
         # 把起始地址加入"已访问"黑名单集合中
         self.visited_addresses.add(start_address)       
@@ -64,9 +64,9 @@ class TraceEngine:
             # 4.遍历这些交易记录，对这堆档案 (records)进行分析出来每笔交易的对方地址和金额
             for tx in records:
                 # tx的结构通常是(tx_hash, from_addr, to_addr, symbol, amount, timestamp)
-                tx_hash = tx[0]
-                to_addr = tx[2]      # to_addr收款人地址
-                amount = tx[4]
+                tx_hash = tx['tx_hash']  # tx_hash交易哈希
+                to_addr = tx['to_addr']      # to_addr收款人地址
+                amount = tx['amount']
 
                 # 5.1.防止无限循环or粉尘攻击，如果有触发，跳出当前for循环
                 if (to_addr in self.visited_addresses) or (amount <= self.config.min_amount):

@@ -1,6 +1,8 @@
-from peel_chain_detector import PeelchainDetector
-from sanction_screener import SanctionScreener
-from risk_engine import RiskEngine
+from risk_analysis.peel_chain_detector import PeelchainDetector
+from risk_analysis.sanction_screener import SanctionScreener
+from risk_analysis.risk_engine import RiskEngine
+from visualization.graph_builder import GraphBuilder
+
 
 def main():
     print("KYT 智能风控系统 正在启动...")
@@ -80,7 +82,10 @@ def main():
 
         print("-"*50)
 
-    print(f"审查完毕，共生成{len(final_profiles)}份高危实体档案。")
+    print("正在生成本地关系图谱...")
+    builder = GraphBuilder()
+    builder.build_from_trace(mock_trace_tree)
+    builder.visualize()  
 
 if __name__ == "__main__":
     main()

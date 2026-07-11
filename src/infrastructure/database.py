@@ -78,7 +78,17 @@ class DatabaseManager:
         
         try:
             self.cur.execute(get_tx_query, (address, address))  # 查询时，from 和 to 都要检查，所以传入两次地址参数
-            records = self.cur.fetchall()  # 获取查询结果
+            records = []
+            rows = self.cur.fetchall()  # 获取查询结果
+            for row in rows:
+                records.append({
+                    "tx_hash": row[0],
+                    "from_addr": row[1],
+                    "to_addr": row[2],
+                    "symbol": row[3],
+                    "amount": row[4],                    
+                    "timestamp": row[5]                    
+                })
             return records  # 返回查询结果列表
         except Exception as e:
             print(f"查询交易数据时发生错误: {e}")
