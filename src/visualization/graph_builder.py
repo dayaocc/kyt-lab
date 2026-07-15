@@ -1,6 +1,7 @@
 import networkx as nx
 # import matplotlib.pyplot as plt
 from pyvis.network import Network
+import os
 
 class GraphBuilder:
     def __init__(self):
@@ -27,7 +28,7 @@ class GraphBuilder:
                 )
         return self.graph
     
-    def visualize(self):
+    def generate_interactive_html(self, output_filepath):
         """将内存中的图谱渲染为可视化窗口"""
 
 
@@ -72,10 +73,22 @@ class GraphBuilder:
                 edge["title"] = f" TransferAmount: {amount}"
         
         for node in net.nodes:
+            node_id_lower = str(node['id']).lower()
             node["title"] = f"Address: {node['id']}"
             node["size"] = 25 
             node["color"] = "lightblue"  # 可以根据需要调整节点颜色
+            if "hacker" in node_id_lower:
+                node["color"] = "red"  # 如果节点是黑客地址，标记为红色
+                node["size"] = 30  # 黑客节点更大
+            elif "冷钱包" in node_id_lower:
+                node["color"] = "#800080"       #紫色
+            elif "Vault" in node_id_lower:
+                node["color"] = "green"  # 如果节点是资金池地址，标记为绿色
+                
+        os.makedirs(os.path.dirname(os.path.abspath(output_filepath)), exist_ok=True)
 
-        net.show_buttons(filter_=['physics'])  # 显示物理引擎按钮，方便调整布局
-        net.write_html("transaction_graph.html")  # 将图谱保存为HTML文件并在浏览器中打开
-        print("资金关系图已生成：transaction_graph.html")
+        # net.show_buttons(filter_=['physics'])  # 显示物理引擎按钮，方便调整布局
+        # net.write_html("transaction_graph.html")  # 将图谱保存为HTML文件并在浏览器中打开
+        
+        net.save_graph(output_filepath)  # 将图谱保存为HTML文件
+        print(f"资金关系图图谱已保存至: {output_filepath}")

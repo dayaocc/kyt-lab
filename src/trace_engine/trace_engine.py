@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Dict, Set
-from database import DatabaseManager
-from config import DB_CONFIG
+from infrastructure.database import DatabaseManager
+from infrastructure.config import DB_CONFIG
 from collections import deque
 import pprint
 
@@ -39,8 +39,8 @@ class TraceEngine:
         print(f"最大深度： {self.config.max_depth}层")
         print("====================\n")
 
-        # 统一转换为小写，防止大小写不一致导致的匹配问题
-        start_address = self.config.target_address.lower()        
+        
+        start_address = self.config.target_address        
         
 
         # 把起始地址加入"已访问"黑名单集合中
@@ -112,6 +112,7 @@ class TraceEngine:
         print("\n" + "="*50)
         print("=== 链上资金追踪调查简报 ===")
         print("="*50)
+        pass
 
         # 1.调查范围与元数据
 

@@ -86,6 +86,8 @@ def main():
     builder = GraphBuilder()
     builder.build_from_trace(mock_trace_tree)
     builder.visualize()  
+# =================测试代码=================
 
 if __name__ == "__main__":
+   
     main()
