@@ -1,151 +1,52 @@
-from database import DatabaseManager
-from web3 import Web3
-from config import ALCHEMY_RPC_URL, DB_CONFIG
-import json
-from datetime import datetime, timezone
+from typing import List, Callable, Dict, Any
+from models.transaction import StandardTransaction
+from data_collection.providers.base import DataProvider
 
-# 定义一个最小化的 ERC20 ABI，只包含我们关心的 transfer 和 decimals(默认，小数位函数)
-# 把 JSON 字符串 → Python 对象.type(ERC20_ABI) == list,里面每一项是一个 dict，描述一个函数.
-ERC20_ABI = json.loads('''[
-        {
-            "constant": false, 
-            "inputs": [
-                {"name": "_to", "type": "address"},
-                {"name": "_value", "type": "uint256"}
-            ],
-            "name": "transfer",
-            "outputs": [{"name": "", "type": "bool"}],
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "decimals",
-            "outputs": [{"name": "", "type": "uint8"}],
-            "type": "function"
-        },
-        {
-            "constant": true,
-            "inputs": [],
-            "name": "symbol",
-            "outputs": [{"name": "", "type": "string"}],
-            "type": "function"
-        }
-]''')
 
+
+# 降维成纯粹的调度器，负责连接Provider和Normalizer
 class ChainListener:
-    def __init__(self, db_manager=None):    # db_manager=None外部传进来的数据库对象，设置默认值为None
-        # 初始化连接：Web3 类 + HTTPProvider
-        self.w3 = Web3(Web3.HTTPProvider(ALCHEMY_RPC_URL))
-        self.db = db_manager    # 把外部传进来的数据库管理器赋值给了 ChainListener 的一个实例属性 self.db
-
-    # 这是一个测试函数，用来确认握手是否成功
-    def simple_check(self):        
-        if self.w3.is_connected():
-            print(f"已经连上以太坊主网，当前区块高度为：{self.w3.eth.block_number}")
-            return True
-        else:
-            print("连接失败，请检查 URL 或网络。")
-            return False
-    
-    # 输入input哈希字段，程序自动判断它是ETH“直汇”还是ERC20“合约调用”
-    def decode_transaction(self, tx_hash):
-        # 1.从链上抓取交易原始数据
-        try:
-            tx = self.w3.eth.get_transaction(tx_hash)   # 从交易id  tx_hash中查交易,返回tx是一个web3.datastructures.AttributeDict，本质行为 =  dict
-                                  
-       
-        except Exception as e:
-            return {"error":f"找不到交易或网络错误：{e}"}
-
-        '''
-        print(type(tx_hash))        # str
-        print(type(tx))             # web3.datastructures.AttributeDict        
-        print(type(tx['input']))    # HexBytes
-        '''
-        # 2.获取交易所在区块的详细信息
-        block_number = tx.get('blockNumber')  
-        real_time = None
-
-        if block_number:
-            try:
-                # 调取整个区块的信息,时间在区块里而不是交易里
-                block_info = self.w3.eth.get_block(block_number)
-                # 提取 Unix 时间戳，并翻译成人类可读的格式
-                unix_timestamp = block_info.get('timestamp')
-                real_time = datetime.fromtimestamp(unix_timestamp, tz=timezone.utc)  # 采用UTC时间
-            except Exception as e:
-                print(f"获取区块信息失败: {e}")
+    """
+    数据流调度器 (Orchestrator)。
+    统筹底层数据源获取与数据清洗，对外输出标准的 StandardTransaction 对象列表。
+    """
+    def __init__(self, provider: DataProvider, normalizer_func: Callable[[List[Dict[str, Any]]], List[StandardTransaction]]):   
+        """
+        初始化调度器。
         
-        # 3.提取tx中的 input 数据 (有些版本叫 input，有些叫 data),即合约中的calldata               
-        
-        raw_input = tx.get('input', '0x')   # 如果input没有数据，就返回0x作为默认值
-        # w3.to_hex() 将数据统一格式化为带 0x 前缀的 Hex string字符串（注意：是 HexBytes字节转化为字符串，便于同类型数据判断比较）
-        input_data = self.w3.to_hex(raw_input)        
-        
-        # 4.逻辑分流：区分 ETH 和 ERC20
-        # 绝大多数普通转账（EOA 到 EOA）的 input_data 都是空的（在浏览器上显示为 0x）        
-        if input_data == '0x' or input_data == '0x0':   
-        # === 情况 A: 原生 ETH 转账 ===
-        # 金额在 value 字段，单位是 Wei，需要除以 10^18 换算成 ETH
-            amount_eth = self.w3.from_wei(tx['value'], 'ether')
-            return {
-                "tx_hash": tx_hash,
-                "type": "ETH_TRANSFER",
-                "from": tx['from'],
-                "to": tx['to'],
-                "amount": float(amount_eth),    # 转换为浮点数方便阅读
-                "symbol": "ETH",
-                "block_number": block_number,
-                "timestamp": real_time
-            }
+        参数:
+            provider (DataProvider): 遵循 DataProvider 接口的具体实现实例（如 EtherscanProvider）
+            normalizer_func (Callable): 对应数据源的标准化清洗函数（如 DataNormalizer.normalize_etherscan）
+        """
+        self.provider = provider
+        self.normalizer_func = normalizer_func
 
-        elif input_data.startswith('0xa9059cbb'):
-            # === 情况 B:  ERC20 转账 ===
-            # 需要进一步解码 input_data,检查方法 ID 是否为 transfer (0xa9059cbb)
-            
-            try:
-                # 创建一个临时的合约对象来帮我们要解析，通过交互已有合约的方式
-                # tx['to'] 就是被命令的代币合约的地址（比如 USDT 的地址）
-                contract = self.w3.eth.contract(address=tx['to'], abi=ERC20_ABI)
-                # 解析交易中输入的函数、参数，要求input_data是hex string格式，且必须以0x开头
-                func_obj, func_params = contract.decode_function_input(input_data)
-                # 获取接收方和金额, 这里的 to 是参数里的接收方，不是合约地址
-                # _to、_value在开头ABI中已定义
-                receiver = func_params['_to']
-                raw_amount = func_params['_value']
-                # 与合约交互，获取代币换算精度和符号. .call()用来只读链上状态
-                token_symbol = contract.functions.symbol().call()
-                token_decimals = contract.functions.decimals().call()
-
-                human_amount = raw_amount / (10 ** token_decimals)
-
-                return {
-                    "tx_hash": tx_hash,
-                    "type": "ERC20_TRANSFER",
-                    "from": tx['from'],
-                    "to": receiver,  # 这里的 to 是参数里的接收方，不是合约地址
-                    "token_address": tx['to'],      # 合约地址
-                    "amount": human_amount,
-                    "symbol": token_symbol,
-                    "block_number": block_number,
-                    "timestamp": real_time
-                }
-            except ValueError as e:
-                return {"type": "DECODE_FAILED",
-                         "reason": str(e),
-                         "raw_input": input_data
-                }
-            
-        else:
-            # === 情况 C:  其他交互 ===
-            return {"type": "OTHER_CONTRACT_INTERACTION",
-                     "method_id": input_data[:10],
-                     "info": "非转账类合约交互",                    
-            }    
+    def get_transactions(self, address: str, **kwargs) -> List[StandardTransaction]:
+        """
+        核心调度流：获取原始数据 -> 清洗 -> 输出标准结构
+        参数:
+            address (str): 目标区块链地址
+            **kwargs: 透传给 Provider 的扩展查询参数
+        """
+        print(f"[ChainListener]开始调度获取地址{address} 的交易数据:")
+        # 1 调用数据源获取原始数据
+        raw_data = self.provider.fetch_transactions(address, **kwargs)
+        if not raw_data:
+            print(f"[ChainListener]未从目标地址 {address} 提取到有效数据")
+            return []
         
-        
+        # 2 调用Normalizer进行数据清洗与转换
+        standard_txs = self.normalizer_func(raw_data)
+        print(f"[CahinListener]数据处理完成，已生成 {len(standard_txs)} 条标准化交易记录")
+        return standard_txs
 
+
+
+
+
+ 
+        
+"""
 if __name__ == "__main__":
     print("正在启动KYT数据采集引擎...")
     # 先实例化一个DatabaseManager数据库管理器对象，建立数据库连接
@@ -190,4 +91,5 @@ if __name__ == "__main__":
     # print(listener.decode_transaction("0x44f4a5cb42c77494e019c0af6ea77f6a7a7f27c88dddab8a8e76a6875a0077f6"))
     # print(listener.decode_transaction("0xfc6567db30fd74b27a6d158a0c4852b8faddae02579f529792272633e10ba125"))
     
+"""
 
