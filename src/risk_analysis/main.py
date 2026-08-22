@@ -1,4 +1,4 @@
-from risk_analysis.peel_chain_detector import PeelchainDetector
+from risk_analysis.detectors.peel_chain import PeelchainDetector
 from risk_analysis.sanction_screener import SanctionScreener
 from risk_analysis.risk_engine import RiskEngine
 from visualization.graph_builder import GraphBuilder

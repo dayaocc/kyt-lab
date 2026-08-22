@@ -43,7 +43,7 @@ class DataNormalizer:
                     from_address=str(tx.get("from", "")),
                     to_address=str(tx.get("to", "")),
                     amount=real_amount,
-                    timestamp=int(tx.get("timestamp", 0))
+                    timestamp=int(tx.get("timeStamp", 0)),
                     token_symbol=str(tx.get("tokenSymbol", "UNKNOWN")),
                     is_success= not is_error,
                     error_msg=err_msg

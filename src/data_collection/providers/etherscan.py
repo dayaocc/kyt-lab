@@ -8,7 +8,7 @@ class EtherscanProvider(DataProvider):
     负责通过 Etherscan REST API 获取真实的以太坊链上交易数据。
     """
 
-    def __init__(self, api_key: str, base_url: str = "https://api.etherscan.io/api"):
+    def __init__(self, api_key: str, base_url: str = "https://api.etherscan.io/v2/api"):
         """
         初始化 Etherscan Provider。
         
@@ -32,10 +32,11 @@ class EtherscanProvider(DataProvider):
         # 从 kwargs 中提取参数，如果没传则使用默认值.
         tx_type = kwargs.get("tx_type", "tokentx")
         start_block = kwargs.get("start_block", 0)
-        end_block = kwargs.get("end_block", 999999)
+        end_block = kwargs.get("end_block", 999999999)
 
         # 设置发送给 Etherscan 的请求参数
         params = {
+            "chainid":1,
             "module": "account",
             "action": tx_type,
             "address": address,
@@ -57,6 +58,9 @@ class EtherscanProvider(DataProvider):
                 return []
 
             data = response.json()
+
+            print("请求URL：", response.url)
+            print("Etherscan原始返回", data)
 
             # 检查 Etherscan 业务状态码,1表示业务成功
             if data.get("status") == "1":

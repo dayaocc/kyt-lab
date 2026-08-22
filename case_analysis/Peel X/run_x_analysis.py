@@ -16,7 +16,7 @@ sys.path.append(src_dir)
 from visualization.graph_builder import GraphBuilder
 from trace_engine.trace_engine import TraceEngine, TraceConfig
 from risk_analysis.risk_engine import RiskEngine
-from risk_analysis.peel_chain_detector import PeelchainDetector
+from risk_analysis.detectors.peel_chain import PeelchainDetector
 
 from infrastructure.database import DatabaseManager
 from infrastructure.config import DB_CONFIG
