@@ -1,73 +1,77 @@
-from collections import defaultdict
+from typing import List, Dict, Any
+from .detectors.base import BaseDetector
 
 class RiskEngine:
-    def __init__(self):
-        # 风险评级标准矩阵
-        self.level_matrix = {
-            "CRITICAL": 90,     # 致命风险：直接冻结/阻断
-            "HIGH": 70,         # 高危：限制提币，人工审核
-            "MEDIUM": 40,       # 中风险：持续监控
-            "LOW": 0,           # 低风险：正常放行
-        }
+    """
+    基于多个检测器的风险分析引擎。并按照地址进行风险聚合与画像生成。
+    """
+    def __init__(self, detectors: List[BaseDetector] = None):
+        """依赖注入：允许外部在系统启动时，按需装配检测器列表"""
+        self.detectors = detectors or []
 
-        # 多重违规的惩罚系数 (例如：触发一个新规则，在最高分基础上加 10 分)
-        self.penalty_weight = 10
-    
-    def _determine_level(self, score):
+    def register_detector(self, detector: BaseDetector):
         """
-        根据最终风险评分确定风险等级。
+        注册一个新的风险检测器。
         """
-        if score >= self.level_matrix['CRITICAL']:
-            return "CRITICAL"
-        elif score >= self.level_matrix['HIGH']:
-            return "HIGH(高危)"
-        elif score >= self.level_matrix['MEDIUM']:
-            return "MEDIUM(中风险)"
-        else:
-            return "LOW(低风险)"
-    
-    def generate_comprehensive_profiles(self, raw_reports):
+        self.detectors.append(detector)
+
+    def run_analysis(self, trace_tree: List[Dict[str, Any]]) -> Dict[str, Any]:
         """
-        接收所有孤立的警报碎片，融合成每个地址的最终档案
-        """
-        # 1. 实体分组：把同一个嫌疑人的所有报告归拢到一起
-        grouped_reports = defaultdict(list)
-        for report in raw_reports:
-            grouped_reports[report['sender']].append(report)
-        
-        final_profiles = {}     # dict
-
-        # 2. 档案融合与综合打分
-        for address, reports in grouped_reports.items():
-
-            # 提取该地址触发的所有分数和标签
-            all_scores = [r['score'] for r in reports]
-            all_labels = [r['label'] for r in reports]
-
-            # 综合评分算法：最高分 + (额外违规次数 * 惩罚分)，最高封顶 100 分
-            base_scores = max(all_scores)
-            extra_violations = len(all_scores) - 1  # 除了最高分之外的额外违规次数
-            final_score = min(100, base_scores + extra_violations * self.penalty_weight)
-
-            # 去重并合并标签
-            unique_labels = list(set(all_labels))  # list使集合转换为列表
-
-            # 提取具体的犯罪证据链 (如果有的话)
-            evidence_details = []
-            for r in reports:
-                if "path_amounts" in r:
-                    evidence_details.append(f"资金流向{r['path_amounts']}")
-                if "details" in r:
-                    evidence_details.append(f"制裁名单详情{r['details'].get('entity','Unknown')}")
+        分析：
+            trace_tree: 标准化的资金追踪路径。
             
-        # 3.生成属于每一个变量address的最终档案
-            final_profiles[address] = {
-                "address": address,
-                "final_score": final_score,
-                "risk_level": self._determine_level(final_score),
-                "labels": unique_labels,
-                "evidence": evidence_details,
-                "violation_count": len(reports)
-            }
+        返回:
+            Dict: 以地址为 Key 的实体风险画像集合。
+        """
         
-        return final_profiles
+        raw_alerts = []
+
+        # 1.遍历所有注册的检测器，收集原始风险警报
+        for detector in self.detectors:
+            raw_alerts.extend(detector.detect(trace_tree))
+
+        # 2.警报聚合
+        return self.aggregate_risk_profiles(raw_alerts)
+
+    def aggregate_risk_profiles(self, alerts: List[Dict[str, Any]]) -> Dict[str, Any]:
+        """
+        聚合风险警报，计算总分，生成实体风险画像。
+        """
+        aggregated = {}
+        
+        for alert in alerts:            
+            address = alert.get("address")
+
+            # 初始化该地址的画像骨架
+            if address not in aggregated:
+                aggregated[address] = {
+                    "total_score": 0,                    
+                    "risk_level": "LOW",
+                    "tags": set(),      # 使用集合自动去重风险标签
+                    "alerts": []        # 记录所有触发的警报详情
+                }
+
+            # 累加风险分数
+            aggregated[address]["total_score"] += alert.get("score", 0)
+            aggregated[address]["tags"].add(alert.get("label", "UNKNOWN"))
+            aggregated[address]["alerts"].append({
+                "severity": alert.get("severity", "UNKNOWN"),
+                "evidence": alert.get("evidence", {}),
+            })
+
+        # 3.根据总分计算最终风险等级
+        for addr, profile in aggregated.items():
+            total_score = profile["total_score"]
+            if total_score >= 100:
+                profile["risk_level"] = "CRITICAL"
+            elif total_score >= 60:
+                profile["risk_level"] = "HIGH"
+            elif total_score >= 30:
+                profile["risk_level"] = "MEDIUM"
+            else:
+                profile["risk_level"] = "LOW"
+
+            # 将标签集合转换为列表,保证后续导出或 API 输出时能够正常进行 JSON 序列化
+            profile["tags"] = list(profile["tags"])
+
+        return aggregated

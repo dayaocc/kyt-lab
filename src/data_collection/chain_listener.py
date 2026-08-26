@@ -1,7 +1,6 @@
 from typing import List, Callable, Dict, Any
-from models.transaction import StandardTransaction
-from data_collection.providers.base import DataProvider
-
+from src.models.transaction import StandardTransaction
+from src.data_collection.providers.base import DataProvider
 
 
 # 降维成纯粹的调度器，负责连接Provider和Normalizer
@@ -18,6 +17,7 @@ class ChainListener:
             provider (DataProvider): 遵循 DataProvider 接口的具体实现实例（如 EtherscanProvider）
             normalizer_func (Callable): 对应数据源的标准化清洗函数（如 DataNormalizer.normalize_etherscan）
         """
+
         self.provider = provider
         self.normalizer_func = normalizer_func
 
@@ -28,7 +28,9 @@ class ChainListener:
             address (str): 目标区块链地址
             **kwargs: 透传给 Provider 的扩展查询参数
         """
+
         print(f"[ChainListener]开始调度获取地址{address} 的交易数据:")
+
         # 1 调用数据源获取原始数据
         raw_data = self.provider.fetch_transactions(address, **kwargs)
         if not raw_data:

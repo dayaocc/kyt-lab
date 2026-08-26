@@ -13,10 +13,10 @@ class EtherscanProvider(DataProvider):
         初始化 Etherscan Provider。
         
         参数:
-            api_key (str): 你的 Etherscan API 密钥
+            api_key (str):  Etherscan API 密钥
             base_url (str): API 端点。如果是 BSC 链可以替换为 bscscan 的 url。
         """
-        self.api_key = api_key      #还没配置
+        self.api_key = api_key      
         self.base_url = base_url  
 
     def fetch_transactions(self, address: str, **kwargs) -> List[Dict[str, Any]]:
@@ -60,7 +60,7 @@ class EtherscanProvider(DataProvider):
             data = response.json()
 
             print("请求URL：", response.url)
-            print("Etherscan原始返回", data)
+            # print("Etherscan原始返回", data)
 
             # 检查 Etherscan 业务状态码,1表示业务成功
             if data.get("status") == "1":

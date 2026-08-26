@@ -1,0 +1,140 @@
+{
+    "trace_tree": [
+        {
+            "tx_hash": "0xe300dc256f5972953a64430cd093117c562737c0c62fb86b3caad7c3a701a6e8",
+            "from": "0x0ddc6030572aa4b73ee82d6650cac9b5cd5ffd00",
+            "to": "0xff7174d64192454382776ef21dbf131b2a62b334",
+            "amount": 10.0,
+            "symbol": "UPC",
+            "current_depth": 0,
+            "timestamp": 1743502091
+        },
+        {
+            "tx_hash": "0xdf860be36aed2d4aa27561e999efe7171d4dca7480e688cd3c85f4e66b5acfdf",
+            "from": "0x0ddc6030572aa4b73ee82d6650cac9b5cd5ffd00",
+            "to": "0xff7174d64192454382776ef21dbf131b2a62b334",
+            "amount": 18473280.0,
+            "symbol": "UPC",
+            "current_depth": 0,
+            "timestamp": 1743502163
+        },
+        {
+            "tx_hash": "0x88f745fd9ea8854ae6bda58e245c0af6ed0aefce960bc7465335b0b2fa6aa002",
+            "from": "0x0ddc6030572aa4b73ee82d6650cac9b5cd5ffd00",
+            "to": "0xff7133719431c98167569a363f557c329feab334",
+            "amount": 10.0,
+            "symbol": "ЕRC20",
+            "current_depth": 0,
+            "timestamp": 1743502199
+        },
+        {
+            "tx_hash": "0x9759d0df8a934952c23cd549b7cb845dfb82c31c88f107c0ccd670d90dbb311c",
+            "from": "0xff7174d64192454382776ef21dbf131b2a62b334",
+            "to": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "amount": 10.0,
+            "symbol": "UPC",
+            "current_depth": 1,
+            "timestamp": 1743757295
+        },
+        {
+            "tx_hash": "0x947f6a113070f633d19123a5690326a7123a8a610420381baacb5b20fe2a6a1b",
+            "from": "0xff7174d64192454382776ef21dbf131b2a62b334",
+            "to": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "amount": 18473280.0,
+            "symbol": "UPC",
+            "current_depth": 1,
+            "timestamp": 1743757523
+        },
+        {
+            "tx_hash": "0x449e8edb15813a8dc1be3346fcc940191dc60b70470f46184261a9e22561dfa2",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0x14e46e1b893d72dc82153639aa25cbd5d510cf51",
+            "amount": 10.0,
+            "symbol": "UPC",
+            "current_depth": 2,
+            "timestamp": 1747270307
+        },
+        {
+            "tx_hash": "0x70240dab68359f4abf9a32d23c4a916f7f2314aad7bd889b93855fc87dde1747",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0x14e46e1b893d72dc82153639aa25cbd5d510cf51",
+            "amount": 10.0,
+            "symbol": "UPC",
+            "current_depth": 2,
+            "timestamp": 1787110175
+        },
+        {
+            "tx_hash": "0xeb6565f79ff49586c6ff226b0c8e5928f754126a5f74dbda30dc1cfc5f7d1881",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0x14e46e1b893d72dc82153639aa25cbd5d510cf51",
+            "amount": 27419447.0,
+            "symbol": "UPC",
+            "current_depth": 2,
+            "timestamp": 1787110307
+        },
+        {
+            "tx_hash": "0x9d8ae36300f1ebf45e865b91abaa7d4778d1097922d808cc8c1321d6c5d57163",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0x14e4251abc44122602e197ef367a59091cb3cf51",
+            "amount": 1e-12,
+            "symbol": "Тoken",
+            "current_depth": 2,
+            "timestamp": 1787110415
+        },
+        {
+            "tx_hash": "0x03fc4121d8e885c3ed795f6d3ec41bf42aaa56204e9126613056404377e06164",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0x3bef3105133b9ba898e9accb12263b6d632748e9",
+            "amount": 10.0,
+            "symbol": "UPC",
+            "current_depth": 2,
+            "timestamp": 1787113547
+        },
+        {
+            "tx_hash": "0x2b15488492868fb8043df6738e46d8ae10934b555dce7523857563beb0bd4f3f",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0x3bef3105133b9ba898e9accb12263b6d632748e9",
+            "amount": 3051545.0,
+            "symbol": "UPC",
+            "current_depth": 2,
+            "timestamp": 1787113619
+        },
+        {
+            "tx_hash": "0x21b3e2bcedbc732d78d65df644a1a0c1153f4ef79bd4023f26282e01f5e80a2a",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0xd1e5d321fcf63e281fb399f81d2ff49ff2b39246",
+            "amount": 10.0,
+            "symbol": "UPC",
+            "current_depth": 2,
+            "timestamp": 1787113667
+        },
+        {
+            "tx_hash": "0x641787bc6535fb649859c617f44cdb5a25436139d1e19d47204bdc8c8b766384",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0xd1e5d321fcf63e281fb399f81d2ff49ff2b39246",
+            "amount": 23563867.0,
+            "symbol": "UPC",
+            "current_depth": 2,
+            "timestamp": 1787113763
+        },
+        {
+            "tx_hash": "0x4b27cdb50696a910c73ff1b24d55aaba4d11b0c97b8a0bcaf1bbe1c2b6477d3c",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0x3bef0f38922b146dfbb68a591955e1f150ca48e9",
+            "amount": 1e-12,
+            "symbol": "Тoken",
+            "current_depth": 2,
+            "timestamp": 1787113823
+        },
+        {
+            "tx_hash": "0x91bfce6bce0ef15f1b01966c6d5c1cb10b409eaa03e11dc5e3b608be342b90c4",
+            "from": "0x2d31a16d7e99c4af119ee7dc5028ec6d8f14d331",
+            "to": "0xd1e555ed70abb62b44fbbc90cd2c1e7beb769246",
+            "amount": 1e-12,
+            "symbol": "Тoken",
+            "current_depth": 2,
+            "timestamp": 1787113871
+        }
+    ],
+    "risk_profiles": {}
+}

@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from models.transaction import StandardTransaction
+from src.models.transaction import StandardTransaction
 
 class DataNormalizer:
     """
