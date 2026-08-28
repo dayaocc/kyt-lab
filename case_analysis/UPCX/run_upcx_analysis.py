@@ -13,11 +13,13 @@ from src.risk_analysis.detectors.peel_chain import PeelchainDetector
 from src.risk_analysis.risk_engine import RiskEngine
 from src.trace_engine.trace_engine import TraceEngine, TraceConfig
 
+# 导入可视化组件
 from src.visualization.graph_builder import GraphBuilder
+from src.report.generator import ReportGenerator
 
 def main():
     print("="*50)
-    print("UPCX 真实安全事件风险分析流水线启动")
+    print("UPCX 真实安全事件风险分析启动")
     print("="*50)
 
     # 1.加载基础配置
@@ -30,7 +32,7 @@ def main():
     TARGET_ADDRESS = "0x0DDC6030572Aa4B73EE82d6650cAc9B5cd5ffd00"
 
     # 2.装配数据获取层
-    print("\n[1/4] 初始化数据获取层..")
+    print("\n[1/5] 初始化数据获取层..")
     provider = EtherscanProvider(api_key=api_key)
     listener = ChainListener(
         provider=provider,
@@ -52,7 +54,7 @@ def main():
     )
 
     # 4.装配risk_engine
-    print("[2/4] 挂载 风险检测插件...")
+    print("[2/5] 挂载 风险检测插件...")
     peel_detector = PeelchainDetector(
         peel_min_ratio=0.01,
         peel_max_ratio=0.20,
@@ -89,7 +91,7 @@ def main():
 
     
     # 7.风险分析
-    print(f"\n[3/4] 开始执行风险分析 (目标: {TARGET_ADDRESS})...")
+    print(f"\n[3/5] 开始执行风险分析 (目标: {TARGET_ADDRESS})...")
     risk_profiles = risk_engine.run_analysis(
         trace_tree
     )
@@ -114,7 +116,7 @@ def main():
     print(f"\n完整分析结果已保存到：{result_path}")   
 
     # 9.输出可视化图谱
-    print("\n[4/4]生成交互式资金图谱---")
+    print("\n[4/5]生成交互式资金图谱...")
 
     graph_builder = GraphBuilder(output_dir=result_dir)
 
@@ -133,7 +135,18 @@ def main():
         output_filepath=graph_path
     )
 
-    # 10.输出最终摘要
+    # 10.生成报告
+    print("\n[5/5]自动生成调查报告....")
+    report_gen = ReportGenerator(output_dir="output")
+    report_gen.generate_markdown(
+        targe_address=TARGET_ADDRESS,
+        trace_tree=trace_tree,
+        risk_profiles=risk_profiles,
+        filename="upcx_investigation_report.md"
+    )
+
+
+    # 11.输出最终摘要
     print("\n" + "=" * 50)
     print("upcx案件分析完成")
     print(f"资金路径数量：{len(trace_tree)}")

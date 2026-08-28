@@ -10,15 +10,17 @@ class RPCProvider(DataProvider):
         self.simple_check()
 
     
-# 验证节点是否连接成功
+    # 验证节点是否连接成功
     def simple_check(self):        
         if not self.web3.is_connected():
             raise ConnectionError("RPC节点连接失败")
             
         print(f"RPC节点连接成功,当前区块高度为：{self.web3.eth.block_number}")
         return True    
+    
     # 输入input哈希字段，程序自动判断它是ETH“直汇”还是ERC20“合约调用”
     def decode_transaction(self, tx_hash: str) -> dict:
+
         # 1.从链上抓取交易原始数据
         try:
             tx = self.w3.eth.get_transaction(tx_hash)   # 从交易id  tx_hash中查交易,返回tx是一个web3.datastructures.AttributeDict，本质行为 =  dict
@@ -32,6 +34,7 @@ class RPCProvider(DataProvider):
         print(type(tx))             # web3.datastructures.AttributeDict        
         print(type(tx['input']))    # HexBytes
         '''
+
         # 2.获取交易所在区块的详细信息
         block_number = tx.get('blockNumber')  
         real_time = None
@@ -49,6 +52,7 @@ class RPCProvider(DataProvider):
         # 3.提取tx中的 input 数据 (有些版本叫 input，有些叫 data),即合约中的calldata               
         
         raw_input = tx.get('input', '0x')   # 如果input没有数据，就返回0x作为默认值
+        
         # w3.to_hex() 将数据统一格式化为带 0x 前缀的 Hex string字符串（注意：是 HexBytes字节转化为字符串，便于同类型数据判断比较）
         input_data = self.w3.to_hex(raw_input)        
         

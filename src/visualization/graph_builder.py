@@ -87,7 +87,7 @@ class GraphBuilder:
                 tx_hash=tx_hash,
                 depth=depth,                
                 title=(
-                    f"Amount:{amount:,.4f}{symbol}<br>"
+                    f"Amount:{amount:,.4f} {symbol}<br>"
                     f"TxHash: {tx_hash}<br>"
                     f"Depth: {depth}"
                 )             
