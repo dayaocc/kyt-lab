@@ -148,7 +148,7 @@ class PeelchainDetector(BaseDetector):
             alerts.append({
                 "address": start_node,
                 "risk_type": "Confirmed Peel Chain",
-                "severity": "CRITICAL",
+                "risk_level": "CRITICAL",
                 "score": 100,
                 "path": chain_path,
                 "main_amounts": main_amounts,

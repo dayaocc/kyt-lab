@@ -15,7 +15,8 @@ class TraceConfig:
     direction: str = 'outflow'      # 监控方向，默认为“outflow”，也可以是“inflow”或“both”
     min_amount: float = 0.0         # 最小金额阈值，默认为0，表示监控所有金额的交易
     max_depth: int = 3              # 追踪深度，默认为3层，表示追踪交易链上的3笔交易，防止深挖消耗算力
-    tx_type: str = "tokentx"
+    start_block: int = 0
+    end_block: int = 99999999
 
 # 模块2：深度追踪引擎
 class TraceEngine:
@@ -24,8 +25,8 @@ class TraceEngine:
         self.config = config
         
         # 用于记录已经访问过的地址，避免重复追踪
-        self.visited_addresses: Set[str] = set()  # visited_addresses是一个集合，里面存放字符串地址
-        self.trace_tree: List[Dict] = [] # 用于存储追踪结果的树形结构
+        self.visited_addresses: Set[str] = set()    # visited_addresses是一个集合，里面存放字符串地址
+        self.trace_tree: List[Dict] = []            # 用于存储追踪结果的树形结构
     
     def start_tracing(self):
         """开始追踪指定地址的交易链"""
@@ -42,13 +43,13 @@ class TraceEngine:
         # 开启广度优先搜索（BFS）追踪交易链
         # 1.初始化排队名单，把起始地址（头号可疑地址）和层级（第0层）以元组的形式加入队列
         queue = deque([
-            (start_address, 0)
+            (start_address, 0, 0)
         ])
                  
         while queue:
 
             # 1.取出当前要查的地址和它所在的层级
-            current_addr, current_depth = queue.popleft() # 从队列头部取出一个地址和对应的层级
+            current_addr, current_depth, incoming_timestamp = queue.popleft() # 从队列头部取出一个地址和对应的层级
 
             # 2.深度熔断保护：如果已经查到预设的最深层，就跳过他，不再向下深挖，用continue跳出当前循环，开启下一个
             if current_depth >= self.config.max_depth:
@@ -57,7 +58,8 @@ class TraceEngine:
             # 3.调取档案：直接通过 ChainListener 获取真实链上交易
             records = self.listener.get_transactions(
                 address=current_addr,
-                tx_type=self.config.tx_type
+                start_block=self.config.start_block,
+                end_block=self.config.end_block 
             )
             print(f"当前在第{current_depth}层，在地址{current_addr}查询到的交易数量为：{len(records)}，正在分析中。。。\n")
 
@@ -66,6 +68,10 @@ class TraceEngine:
                 # 只处理成功交易
                 if not tx.is_success:
                     continue
+
+                # 只处理时间戳晚于当前地址的交易，避免回溯
+                if tx.timestamp < incoming_timestamp:
+                    continue    
 
                 from_addr = tx.from_address.lower()
                 to_addr = tx.to_address.lower()
@@ -99,25 +105,18 @@ class TraceEngine:
                  
                 if next_addr in self.visited_addresses:
                     continue
+
                 self.visited_addresses.add(next_addr)                   
 
                 # 6.确认为有效新线索，加入黑名单并排队
-                queue.append(
-                    (next_addr, current_depth + 1)
-                )              
+                queue.append((next_addr, current_depth + 1, tx.timestamp))
+                                                 
                          
         print(f"调查结束，共记录了{len(self.trace_tree)}条资金跳转路径。\n")
 
         return self.trace_tree 
 
     
-    # def generate_report(self):
-    #     """根据追踪结果生成分析报告，供后续审计和决策使用"""
-    #     print("\n" + "="*50)
-    #     print("=== 链上资金追踪调查简报 ===")
-    #     print("="*50)
-    #     pass
-
-        # 1.调查范围与元数据
+   
 
 

@@ -1,13 +1,23 @@
 {
     "0x12d66f87a04a9e220743712ce6d9bb1b5616b8fc": {
-        "name": "Tornado Cash Router",
+        "name": "Tornado Cash 0.1 ETH Pool",
         "type": "Mixer Interaction",
         "risk_level": "CRITICAL"
     },
-    "0x8576acc5c05d6ce88f4e49bf65bdf0c62f91353c": {
-        "name": "Lazarus Group Associated",
-        "type": "Sanctioned Entity",
+    "0xa160cdab225685da1d56aa342ad8841c3b53f291": {
+        "name": "Tornado Cash: 100 ETH Pool",
+        "type": "Mixer",
         "risk_level": "CRITICAL"
+    },    
+    "0x0d043128146654c7683fbf30ac98d7b2285ded00": {
+        "name": "Harmony Horizon Exploiter H1",
+        "type": "Hacker",
+        "risk_level": "CRITICAL"
+    },
+    "0xd90e2f925da726b50c4ed8d0fb90ad053324f31b": {
+    "name": "Tornado Cash Router",
+    "type": "Mixer",
+    "risk_level": "CRITICAL"
     },
     "0x3f5ce5fbfe3e9af3971dd833d26ba9b5c936f0be": {
         "name": "Binance Hot Wallet",

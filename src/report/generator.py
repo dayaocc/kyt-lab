@@ -20,9 +20,9 @@ KYT 链上资金追踪与合规调查报告
 --------------------
 ## 1.执行摘要
 本次调查针对目标地址 `{{ target_address }}` 展开了链上资金流向分析，追踪深度为 **{{ max_depth }}** 层。
-系统共抓取并分析了 **{{ total_txs }}** 条有效转账记录，涉及 **{{ unique_addresses }} **个独立实体地址。
+系统共抓取并分析了 **{{ total_txs }}** 条有效转账记录，涉及 **{{ unique_addresses }} **个独立链上地址。
 
-经过风险引擎（Risk Engine）的模型测算与库碰撞，共发现 **{{ risk_entities_count }}** 个具备洗钱或违规特征的高危实体。
+经过风险引擎（Risk Engine）的模型测算与库碰撞，共发现 **{{ risk_entities_count }}** 个命中风险规则或已知风险标签的实体。
 
 ## 2. 高危风险实体剖析
 {% if risk_profiles %}
@@ -42,15 +42,16 @@ KYT 链上资金追踪与合规调查报告
 ## 3. 资金流转统计 (Fund Flow Overview)
 * **追踪起始点:**  `{{ target_address }}`
 * **总流转笔数:**  {{ total_txs }} 笔
-* **涉及的主流代币资产:**  {{ tokens | join(', ') }}
+* **涉及的代币资产:**  {{ tokens | join(', ') }}
+
 
 ## 4. 调查结论与建议 (Conclusion & Recommendations)
 {% if risk_entities_count > 0 %}
 **结论:** 
-目标地址下游资金流向呈现出明显的掩饰隐瞒特征（如触发资金剥皮拆分模型，或直接与高危/制裁实体发生交互）。
+目标地址及其下游资金路径命中了已知高风险实体，存在明显的风险交互行为。具体风险类型及证据见上述风险实体画像。
 **建议:**
 1. 建议将上述检测到的高危地址列入内部业务监控黑名单。
-2. 结合可视化交互图谱（`kyt_investigation_graph.html`），进一步人工核实资金的最终沉淀节点（如审查是否流入了可冻结资产的中心化交易所 CEX）。
+2. 结合可视化交互图谱（`transaction_graph.html`），进一步人工核实资金的最终沉淀节点（如审查是否流入了可冻结资产的中心化交易所 CEX）。
 {% else %}
 **结论:** 
 目标地址下游流转暂未表现出标准的机器可识别风险。
@@ -62,9 +63,9 @@ KYT 链上资金追踪与合规调查报告
 
     def generate_markdown(
         self, 
-        targe_address: str, 
+        target_address: str, 
         trace_tree: List[Dict[str, Any]], 
-        risk_profiles: Dict[str, Any],
+        risk_profiles: Dict[str, Any],        
         filename: str = "investigation_report.md" 
     ) -> str:
         
@@ -79,25 +80,28 @@ KYT 链上资金追踪与合规调查报告
             unique_addresses.add(tx.get("to"))
             tokens.add(tx.get("symbol", "UNKNOWN"))
 
-            depth = tx.get("current_depth", 0)
+            depth = tx.get("current_depth", 0) + 1
+
             if depth > max_depth:
                 max_depth = depth
 
         # 删除无效空数据
         unique_addresses.discard(None)
         unique_addresses.discard("")
+
         tokens.discard("")
+        tokens.discard(None)
 
         # 准备给jinja解析用的数据
         context = {
             "generated_time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "target_address": targe_address,
+            "target_address": target_address,
             "max_depth": max_depth,
             "total_txs": len(trace_tree),
             "unique_addresses": len(unique_addresses),
             "risk_profiles": risk_profiles,
             "risk_entities_count": len(risk_profiles),
-            "tokens": list(tokens)
+            "tokens": list(tokens),            
         }
 
         # 把template_str字符串转换为jinja对象

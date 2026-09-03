@@ -53,8 +53,8 @@ class SanctionDetector(BaseDetector):
 
         for tx in trace_tree:
             # 提取交易的收发地址并转为小写
-            sender = tx.get('from') or tx.get('from_address', '').lower()
-            receiver = tx.get('to') or tx.get('to_address', '').lower()
+            sender = (tx.get('from') or tx.get('from_address', '')).lower()
+            receiver = (tx.get('to') or tx.get('to_address', '')).lower()
 
             for address in (sender, receiver):
                 if not address or address in flagged_addresses:
@@ -63,9 +63,8 @@ class SanctionDetector(BaseDetector):
                 if address in self.sanction_data:
                     entity_info = self.sanction_data[address]
                     risk_level = entity_info.get('risk_level', 'HIGH')  
-
-                    # 只报警高危交互，低危交互不报警
-                    if risk_level not in ["CRITICAL", "HIGH"]:
+                    
+                    if risk_level in ["CRITICAL", "HIGH"]:
 
                         score = 100 if risk_level == "CRITICAL" else 75
 

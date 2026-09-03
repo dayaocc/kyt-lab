@@ -87,8 +87,8 @@ class GraphBuilder:
                 tx_hash=tx_hash,
                 depth=depth,                
                 title=(
-                    f"Amount:{amount:,.4f} {symbol}<br>"
-                    f"TxHash: {tx_hash}<br>"
+                    f"Amount:{amount:,.4f} {symbol}\n"
+                    f"TxHash: {tx_hash}\n"
                     f"Depth: {depth}"
                 )             
             )
@@ -141,8 +141,8 @@ class GraphBuilder:
         title = f"Address: {address}"
 
         if profile:
-            title += "<br><br>Risk Profile:"
-            title += f"<br>{profile}"
+            title += "\n Risk Profile:"
+            title += f"\n {profile}"
 
         self.graph.add_node(
             address,

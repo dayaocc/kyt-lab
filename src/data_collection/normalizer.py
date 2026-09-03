@@ -31,12 +31,23 @@ class DataNormalizer:
 
                 # Etherscan 有时会在 errDescription 给出具体报错，若无则给默认提示。
                 err_msg = "Transaction Failed or Reverted" if is_error else ""
+                              
+                # 2. 判断交易类型并进行金额精度换算
+                if tx.get("tokenSymbol"):
+                    # ERC-20会有此键值
+                    decimals = int(tx.get("tokenDecimal", 18))
+                    tokensymbol = str(tx.get("tokenSymbol"))
+                else:
+                    decimals = 18
+                    tokensymbol = "ETH"
 
-                # 2.精度换算
-                decimals = int(tx.get("tokenDecimal", 18))     
                 raw_value = float(tx.get("value", 0))
-                real_amount = raw_value / (10 ** decimals)
+                
+                if tokensymbol == "ETH" and raw_value == 0:
+                    continue  # 跳过ETH交易中金额为0的交易   
 
+                real_amount = raw_value / (10 ** decimals) 
+               
                 # 3.根据params中的请求参数，对应Etherscan API，来构造包含状态的标准数据模型
                 std_tx = StandardTransaction(
                     tx_hash=str(tx.get("hash", "")),                
@@ -44,8 +55,8 @@ class DataNormalizer:
                     to_address=str(tx.get("to", "")),
                     amount=real_amount,
                     timestamp=int(tx.get("timeStamp", 0)),
-                    token_symbol=str(tx.get("tokenSymbol", "UNKNOWN")),
-                    is_success= not is_error,
+                    token_symbol=tokensymbol,
+                    is_success=not is_error,
                     error_msg=err_msg
                 )
                 

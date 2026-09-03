@@ -53,10 +53,10 @@ class RiskEngine:
 
             # 累加风险分数
             aggregated[address]["total_score"] += alert.get("score", 0)
-            aggregated[address]["tags"].add(alert.get("label", "UNKNOWN"))
+            aggregated[address]["tags"].add(alert.get("risk_type", "UNKNOWN"))
             aggregated[address]["alerts"].append({
-                "severity": alert.get("severity", "UNKNOWN"),
-                "evidence": alert.get("evidence", {}),
+                "severity": alert.get("risk_level", "UNKNOWN"),
+                "evidence": alert.get("evidence", ""),
             })
 
         # 3.根据总分计算最终风险等级

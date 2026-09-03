@@ -44,8 +44,7 @@ def main():
         target_address=TARGET_ADDRESS,
         direction="outflow",
         min_amount=0.0,
-        max_depth=3,
-        tx_type="tokentx"
+        max_depth=3,        
     )
 
     trace_engine = TraceEngine(
@@ -137,9 +136,9 @@ def main():
 
     # 10.生成报告
     print("\n[5/5]自动生成调查报告....")
-    report_gen = ReportGenerator(output_dir="output")
+    report_gen = ReportGenerator(output_dir=result_dir)
     report_gen.generate_markdown(
-        targe_address=TARGET_ADDRESS,
+        target_address=TARGET_ADDRESS,
         trace_tree=trace_tree,
         risk_profiles=risk_profiles,
         filename="upcx_investigation_report.md"
