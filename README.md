@@ -1,4 +1,4 @@
-# KYT-Lab
+# 简介
 
 **On-chain Risk & Transaction Tracing Prototype**
 
@@ -6,7 +6,7 @@ KYT-Lab 是一个面向 Web3 合规分析与链上调查场景的个人项目。
 
 > 项目定位：用于学习和验证 KYT / 链上风险分析方法，不是生产级合规系统。
 
-## Core Features
+## 核心功能
 
 - **Ethereum 数据采集**：通过 Etherscan V2 API 同时获取 ETH 主币交易（`txlist`）与 ERC-20 转账（`tokentx`）。
 - **统一交易模型**：将原始 API 数据标准化为 `StandardTransaction`，处理 decimals、失败交易、时间戳等字段。
@@ -16,7 +16,7 @@ KYT-Lab 是一个面向 Web3 合规分析与链上调查场景的个人项目。
 - **风险聚合**：`RiskEngine` 聚合风险类型、等级、分数与证据，形成地址级风险画像。
 - **分析交付**：使用 NetworkX + PyVis 输出交互式资金图谱，使用 Jinja2 自动生成 Markdown 调查报告。
 
-## Analysis Pipeline
+## 分析流程
 
 ```text
 Etherscan V2 API
@@ -40,7 +40,7 @@ RiskEngine
 JSON / PyVis HTML / Markdown Report
 ```
 
-## Case Study: Harmony Horizon Bridge
+## 真实事件分析: Harmony Horizon Bridge
 
 项目使用 2022 年 Harmony Horizon Bridge 事件进行真实链上数据复盘，以公开的攻击者地址作为调查起点，在限定时间窗口内追踪其后续资金流向。
 
@@ -60,7 +60,7 @@ JSON / PyVis HTML / Markdown Report
 
 系统识别出的 **14 个关联地址、约 85,700 ETH 流入 Tornado Cash Router** 与公开案件复盘的核心统计一致。
 
-运行：
+运行命令：
 
 ```bash
 python -m case_analysis.harmony_horizon.run_harmony_analysis
@@ -75,22 +75,22 @@ case_analysis/harmony_horizon/results/
 └── harmony_investigation_report.md
 ```
 
-## Other Case
+## 其他事件
 
 `case_analysis/UPCX/`：用于验证通用追踪、风险检测和报告生成流程的另一组链上案例。
 
-## Tech Stack
+## 技术栈
 
 `Python` · `Requests` · `Etherscan API` · `NetworkX` · `PyVis` · `Jinja2` · `Git`
 
-## Current Limitations
+## 当前技术局限
 
 - 当前主要基于 `txlist + tokentx`，尚未完整解析 internal transactions 与复杂智能合约调用语义。
 - 时间因果目前基于秒级 timestamp；同一区块内的严格顺序未来可进一步使用 `blockNumber / transactionIndex / logIndex` 判断。
 - Mixer 会切断确定性的资金关联，因此当前系统在 Tornado Cash 等混币器节点处停止普通 BFS，不将混币后的地址强行认定为同一资金链。
-- 风险实体标签库为项目内维护的演示数据集，不等同于商业 KYT 数据供应商的完整情报库。
+- 风险实体标签库为项目内维护的演示数据集，不是商业 KYT 数据供应商的完整情报库。
 
-## Repository
+## 代码仓
 
 GitHub: https://github.com/dayaocc/kyt-lab
 
